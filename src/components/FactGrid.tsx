@@ -11,12 +11,22 @@ interface Filters {
 }
 
 async function getFacts(filters: Filters): Promise<Fact[]> {
+  let topicoId: number | null = null
+  if (filters.topico) {
+    const { data: t } = await supabase
+      .from("topicos")
+      .select("id")
+      .eq("nombre", filters.topico)
+      .maybeSingle()
+    topicoId = t?.id ?? null
+  }
+
   let query = supabase.from("facts").select(
-    "*, fact_topicos(topico_id, topicos!inner(nombre))"
+    "*, fact_topicos!inner(topico_id, topicos(nombre))"
   )
 
-  if (filters.topico) {
-    query = query.eq("fact_topicos.topicos.nombre", filters.topico)
+  if (topicoId) {
+    query = query.eq("fact_topicos.topico_id", topicoId)
   }
 
   if (filters.fuentes === "true") {
