@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Check, ChevronsUpDown, Plus } from "lucide-react"
+import { useState, useEffect, useCallback } from "react"
+import { Check, ChevronsUpDown, Plus, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -36,16 +36,17 @@ export function TopicCombobox({
   const [open, setOpen] = useState(false)
   const [topicos, setTopicos] = useState<Topico[]>([])
   const [search, setSearch] = useState("")
+  const [creating, setCreating] = useState(false)
 
-  useEffect(() => {
-    supabase
+  const loadTopicos = useCallback(async () => {
+    const { data } = await supabase
       .from("topicos")
       .select("id, nombre")
       .order("nombre")
-      .then(({ data }) => {
-        if (data) setTopicos(data as Topico[])
-      })
+    if (data) setTopicos(data as Topico[])
   }, [])
+
+  useEffect(() => { loadTopicos() }, [loadTopicos])
 
   const selected = topicos.find((t) => t.nombre === value)
   const normalizedSearch = search
@@ -55,6 +56,23 @@ export function TopicCombobox({
     .replace(/\s+/g, "_")
 
   const exists = topicos.some((t) => t.nombre === normalizedSearch)
+
+  async function handleCreate() {
+    if (!normalizedSearch || exists || creating) return
+    setCreating(true)
+    const { error } = await supabase
+      .from("topicos")
+      .insert({ nombre: normalizedSearch })
+    setCreating(false)
+    if (error) {
+      console.error(error)
+      return
+    }
+    await loadTopicos()
+    onChange(normalizedSearch)
+    setOpen(false)
+    setSearch("")
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -86,13 +104,14 @@ export function TopicCombobox({
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-2"
-                  onClick={() => {
-                    onChange(normalizedSearch)
-                    setOpen(false)
-                    setSearch("")
-                  }}
+                  disabled={creating}
+                  onClick={handleCreate}
                 >
-                  <Plus className="h-4 w-4" />
+                  {creating ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Plus className="h-4 w-4" />
+                  )}
                   Añadir &ldquo;{normalizedSearch}&rdquo;
                 </Button>
               ) : (

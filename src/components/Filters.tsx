@@ -44,7 +44,7 @@ export function Filters() {
         <TopicCombobox
           value={topico}
           onChange={(v) => setParam("topico", v)}
-          creatable={false}
+          creatable={true}
         />
       </div>
 
