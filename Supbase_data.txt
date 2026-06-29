@@ -1,0 +1,6 @@
+Supabase data:
+Project URL: https://asqjzhtcnruldfddnqdh.supabase.co
+Project ID:  asqjzhtcnruldfddnqdh
+
+Las claves están en el archivo .env.local (no se sube a git).
+Para configurar desde cero, copia .env.example a .env.local y rellena las claves.

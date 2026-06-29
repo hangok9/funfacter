@@ -1,0 +1,55 @@
+
+
+# 🏗️ Documento Maestro y Plan de Desarrollo: "Fun Facts"
+
+## FASE 1: Cimientos y Base de Datos (Supabase)
+
+* **Configuración del Proyecto:** Conectar la aplicación web a Supabase utilizando la `Project URL` y la `Anon Key` pública.
+* **Esquema Relacional - Tabla `facts`:** Columnas para `id`, `titulo`, `descripcion_breve`, `explicacion_extensa`, `palabras` (entero), `tiene_fuentes` (booleano), `created_at`, `updated_at`.
+* **Esquema Relacional - Tabla `topicos`:** Columnas para `id` y `nombre` (texto normalizado).
+* **Esquema Relacional - Tabla Intermedia:** Crear la tabla `fact_topicos` (M2M) uniendo `fact_id` y `topico_id`.
+* **Estructura de Fuentes:** Implementar un campo JSONB dentro de la tabla `facts` que almacene un array de objetos con los valores `Texto_Mostrado` y `URL_Link` (opcional).
+* **Seguridad y Políticas (RLS):** Permitir `SELECT` (Lectura) e `INSERT` (Creación) a todo el mundo (rol anónimo).
+* **Protección de Datos (RLS):** Bloquear estrictamente las acciones de `UPDATE` (Actualización) y `DELETE` (Borrado) para el rol anónimo.
+
+## FASE 2: Interfaz Principal y Navegación Core (Frontend)
+
+* **Frameworks:** Utilizar Next.js, React, Tailwind CSS y shadcn/ui.
+* **Estética Principal (Grimorio Moderno):** Fondos color pergamino/crema muy sutil, texto principal en gris marengo oscuro.
+* **Tipografía Grimorio:** Fuente *Serif* con carácter para los títulos y *Sans-Serif* limpia para los cuerpos de texto.
+* **Componentes de Tarjeta:** Diseñar tarjetas sin bordes duros, flotando con sombras suaves y redondeadas.
+* **Toggle "Modo Minimalista":** Botón que elimina los fondos crema y las sombras, aplica un esquema estricto de blanco/negro de alto contraste y cambia toda la tipografía web a *Sans-Serif*.
+* **Vista Principal (Portada):** Cuadrícula *responsive* de tarjetas que muestran exclusivamente el Título y los Tópicos.
+* **Interacción de Tarjeta:** Al hacer clic, la tarjeta despliega la `descripcion_breve` y muestra un botón para acceder a la explicación completa.
+* **Vista Detalle (Explicación Extensa):** Ruta dinámica dedicada (ej. `/fact/id`) que carga el texto extenso y las fuentes (enlaces en azul si hay URL, texto plano si no).
+* **Navegación de Retorno:** Botón "Volver" en la Vista Detalle (Flecha en móvil; Flecha + Texto en ordenador) que obligatoriamente preserva los filtros de búsqueda en la URL al retroceder.
+
+## FASE 3: Lógica de Inserción, Normalización y Filtros
+
+* **Formulario de Creación Abierto:** Interfaz pública con inputs para todos los campos y una sección dinámica para "Añadir Fuente".
+* **Tópicos Base Predefinidos:** Poblar el buscador de categorías con temas iniciales como Bioinformática, Literatura Fantástica, Entrenamiento de Fuerza, Tecnología e Historia.
+* **Buscador Creatable:** Desplegable de tópicos con opción de "Añadir nuevo" si el texto tecleado no existe.
+* **Normalización de Datos (Backend):** Función automática que convierte los nuevos tópicos a minúsculas y elimina tildes/espacios extra antes de guardar (ej. "Fantasía Épica" se guarda como `fantasia_epica`).
+* **Formato Visual (Frontend):** Regla de interfaz que capitaliza automáticamente la primera letra de cada tópico renderizado, sin importar cómo esté en la base de datos.
+* **Cálculo de Metadatos:** Script que cuenta las palabras de `explicacion_extensa` antes del `INSERT` y marca el booleano `tiene_fuentes` como verdadero si se ha rellenado ese campo.
+* **Filtros de Portada - Tema y Fuentes:** Filtrado en tiempo real por tópico y un botón/toggle específico para mostrar solo tarjetas "Con Fuentes" (leyendo el booleano).
+* **Filtros de Portada - Longitud:** Desplegable para filtrar por Corto (< 150 palabras), Medio (150 - 500 palabras) o Extenso (> 500 palabras).
+* **Filtros de Portada - Orden Temporal:** Selector para organizar la cuadrícula por fecha de creación o por fecha de última modificación.
+
+## FASE 4: Pulido UX y Retención
+
+* **Tarjetas Sugeridas:** En el fondo de la Vista Detalle, ejecutar una consulta que extraiga y muestre de 2 a 3 tarjetas aleatorias que compartan al menos un tópico con el *fact* que se está leyendo.
+* **Estados Vacíos (Empty States):** Módulo de interfaz limpio y sin distracciones que muestre el texto *"No se ha encontrado nada así"* cuando los filtros aplicados no devuelvan resultados.
+* **Control de Calidad Responsive:** Asegurar que los despliegues de texto, los selectores de los filtros y los botones de retorno ofrezcan áreas de toque amplias y cómodas en pantallas móviles.
+
+---
+
+## FASE 5 (OPCIONAL / V2): El Grafo de Conocimiento
+
+*Desarrollo bloqueado hasta que las Fases 1 a 4 estén 100% implementadas, publicadas y funcionando sin errores.*
+
+* **Ruta Dedicada:** Crear una página independiente (ej. `/grafo`) separada de la Portada.
+* **Motor de Visualización:** Integrar librerías como Sigma.js o Vis.js para renderizar el lienzo de nodos.
+* **Conexión Automática:** Programar una consulta (Query) que trace vínculos (edges) automáticamente entre todos los *facts* que compartan uno o más `topico_id`.
+* **Afinación de Físicas:** Ajustar la repulsión, gravedad y elasticidad de la librería para evitar la superposición de nodos y lograr un arrastre fluido.
+* **Interacción del Grafo:** Configurar un evento de *hover* para revelar el título del nodo y un evento de *click* para redirigir directamente a la Vista Detalle de ese *fact*.
